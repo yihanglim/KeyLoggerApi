@@ -2,41 +2,224 @@
 
 @{
     ViewData["Title"] = "Index";
+
+    var groupedKeyStroke = (from keystroke in Model
+                            group keystroke by keystroke.CreationDate.Date into grp
+                            select new
+                            {
+                                Date = grp.Key,
+                                Keystrokes = grp.Select(g => new
+                                {
+                                    Date = g.CreationDate,
+                                    Key = g.Keystroke,
+                                    Id = g.Id
+                                }).ToList()
+                            }).ToList();
+    //List<object> secondQuater = new List<object>();
+    //List<object> thirdQuater = new List<object>();
+    //List<object> fourthQuater = new List<object>();
+
 }
 
-<h1>Index</h1>
+<h1>Recorded Keystroke</h1>
 
-<p>
-    <a asp-action="Create">Create New</a>
-    <a onclick="if (confirm('Are you sure?')) { window.location.href = '@Url.Action("DeleteAll", "Keylogger")'; }">DeleteAll</a>
-</p>
-<table class="table">
-    <thead>
+<div class="row mb-3 mt-3">
+    <div class="col-4">
+        <a class="btn btn-success" asp-action="Create">Create New</a>
+    </div>
+    <div class="col-4 text-center">
+        <a href="@Url.Action("PrintAll", "Keylogger")" class="btn btn-primary">Print All</a>
+    </div>
+    <div class="col-4 text-right">
+        <a href="javascript:void(0);" class="btn btn-danger" onclick="if (confirm('Are you sure?')) { window.location.href = '@Url.Action("DeleteAll", "Keylogger")'; }">DeleteAll</a>
+    </div>
+</div>
+<table class="table" style="width:100%">
+    <thead style="background-color:#a5cdf9">
         <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Keystroke)
-            </th>
-            <th>
+            <th style="width:20%">
                 @Html.DisplayNameFor(model => model.CreationDate)
             </th>
-            <th></th>
+            <th style="width:40%">
+
+            </th>
+            <th style="width:40%">
+                Action
+            </th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Keystroke)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CreationDate)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
-}
+        @*@foreach (var item in Model) {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Keystroke)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.CreationDate)
+                        </td>
+                        <td>
+                            <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                            <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                            <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                        </td>
+                    </tr>
+            }*@
+        @foreach (var item in groupedKeyStroke)
+        {
+            var firstQuarter = item.Keystrokes.Where(x => x.Date.Hour > 0 && x.Date.Hour <= 6).ToList();
+            var secondQuarter = item.Keystrokes.Where(x => x.Date.Hour > 6 && x.Date.Hour <= 12).ToList();
+            var thirdQuarter = item.Keystrokes.Where(x => x.Date.Hour > 12 && x.Date.Hour <= 18).ToList();
+            var fourthQuarter = item.Keystrokes.Where(x => x.Date.Hour > 18 && x.Date.Hour <= 23).ToList();
+            <tr style="background-color:#d7eaff">
+                <td>
+                    @Html.DisplayFor(modelItem => item.Date.Day)/@Html.DisplayFor(modelItem => item.Date.Month)/@Html.DisplayFor(modelItem => item.Date.Year)
+                </td>
+                <td>
+
+                </td>
+                <td>
+                    <a href="javascript:void(0);" class="btn btn-outline-primary btn-sm mr-3" onclick="ShowNextRow(this)">Open</a>
+                    <a href="javascript:void(0);" class="btn btn-outline-primary btn-sm mr-3" onclick="HideNextRow(this)">Close</a>
+                    <a href="@Url.Action("PrintByDate", "Keylogger", new { date = item.Date})" class="btn btn-outline-primary btn-sm mr-3">Print</a>
+                </td>
+            </tr>
+            <tr style="display:none;">                
+                <td>
+                    <div class="p-1 font-weight-bold">Time</div>
+                    <div class="p-1">0000 - 0600</div>
+                    <div class="p-1">0601 - 1200</div>
+                    <div class="p-1">1201 - 1800</div>
+                    <div class="p-1">1800 - 2359</div>
+                </td>
+                <td class="text-center">
+                    <div class="p-1 font-weight-bold">Data Count</div>
+                    <div class="p-1">@firstQuarter.Count()</div>
+                    <div class="p-1">@secondQuarter.Count()</div>
+                    <div class="p-1">@thirdQuarter.Count()</div>
+                    <div class="p-1">@fourthQuarter.Count()</div>
+                </td>
+                <td>
+                    <div class="p-1 font-weight-bold">&nbsp; View &nbsp;&nbsp;&nbsp; Detected &nbsp; &nbsp; Print</div>
+                    @for (var i = 1; i < 5; i++)
+                    {
+                        <div class="p-1"><a href="javascript:void(0);" class="btn btn-outline-primary btn-sm" onclick="GetKeyByDateTime('@item.Date',@i)">Open</a> &nbsp;&nbsp;&nbsp; <a href="javascript:void(0);" class="btn btn-outline-primary btn-sm" onclick="DetectedWordByDateTime('@item.Date',@i)">Open</a> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a href="@Url.Action("PrintByDateTime", "Keylogger", new { date = item.Date, time = i })" class="btn btn-outline-primary btn-sm">Print</a></div>
+                    }                   
+                </td>
+            </tr>
+        }
     </tbody>
 </table>
+<div id="myModal" class="modal">
+    <!-- Modal content -->
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>
+                        Key
+                    </th>
+                    <th>
+                        Date & Time
+                    </th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>                    
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    <script type="text/javascript">
+
+        function ShowNextRow(openButton) {
+            $(openButton).parents("tr").next("tr").show();
+            $(openButton).parents("tr").css("border-bottom","none");
+        }
+        function HideNextRow(closedButton) {
+            $(closedButton).parents("tr").next("tr").hide();
+        }
+        function ViewKey(btn) {
+            $("#myModal").show();
+        }
+        $(".close").click(function () {
+            $("#myModal").hide();
+            $("#myModal tbody").empty();
+
+        });
+
+        function GetKeyByDateTime(date, time) {
+            var formData ={};
+            formData.date = date;
+            formData.time = time;
+            $.ajax({
+            type: "POST",
+            url: '@Url.Action("KeystrokeByDateTime", "Keylogger")',
+            data: formData,
+            dataType: "json",
+            global: false,
+            contentType: "application/x-www-form-urlencoded; charset=utf-8",
+            cache: false,
+            error: function (xhr, textStatus, errorThrown) {
+                alert("error while retrieving data");
+            },
+                success: function (response) {
+                    for (var i = 0; i < response.length; i++) {
+                        let html = `<tr>
+                                <td>
+                                    `+ response[i].keystroke +
+                            `</td>
+                                <td style="min-width:250px">`
+                            + response[i].creationDate +
+                            `</td>
+                                <td style="min-width:200px">
+                                    <a href="/keylogger/Edit?id=` + response[i].id + `">Edit</a> |
+                                    <a href="/keylogger/Details?id=` + response[i].id + `">Details</a> |
+                                    <a href="/keylogger/Delete?id=` + response[i].id + `">Delete</a>
+                                </td>
+                            </tr>`
+                        $("#myModal tbody").append(html);
+                    }
+                    $("#myModal").show();
+
+            }
+        });
+        }
+
+        function DetectedWordByDateTime(date, time) {
+            var formData ={};
+            formData.date = date;
+            formData.time = time;
+            $.ajax({
+            type: "POST",
+            url: '@Url.Action("WordsByDateTime", "DetectedWords")',
+            data: formData,
+            dataType: "json",
+            global: false,
+            contentType: "application/x-www-form-urlencoded; charset=utf-8",
+            cache: false,
+            error: function (xhr, textStatus, errorThrown) {
+                alert("error while retrieving data");
+            },
+                success: function (response) {
+                    for (var i = 0; i < response.length; i++) {
+                        let html = `<tr>
+                                <td style="width:50%">
+                                    `+ response[i].keystroke +
+                            `</td>
+                                <td style="width:50%">`
+                            + response[i].creationDate +
+                            `</td>
+                            </tr>`
+                        $("#myModal tbody").append(html);
+                    }
+                    $("#myModal").show();
+
+            }
+        });
+        }
+
+    </script>
+}

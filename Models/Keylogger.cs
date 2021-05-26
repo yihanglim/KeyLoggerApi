@@ -21,4 +21,11 @@ namespace KeyLoggerApi.Models
             this.CreationDate = DateTime.UtcNow.ToLocalTime();
         }
     }
+
+    public class KeyData
+    {
+        public int Id { get; set; }
+        public string Keystroke { get; set; }
+        public string CreationDate { get; set; }
+    }
 }

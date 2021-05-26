@@ -6,21 +6,30 @@
 
 <h1>Index</h1>
 
-<p>
-    <a asp-action="Create">Create New</a>
-    <a onclick="if (confirm('Are you sure?')) { window.location.href = '@Url.Action("DeleteAll", "DetectedWords")'; }">DeleteAll</a>
 
-</p>
+<div class="row mb-3 mt-3">
+    <div class="col-4">
+        <a class="btn btn-success" asp-action="Create">Create New</a>
+    </div>
+    <div class="col-4 text-center">
+        <a href="@Url.Action("PrintAll", "DetectedWords")" class="btn btn-primary">Print All</a>
+    </div>
+    <div class="col-4 text-right">
+        <a href="javascript:void(0);" class="btn btn-danger" onclick="if (confirm('Are you sure?')) { window.location.href = '@Url.Action("DeleteAll", "DetectedWords")'; }">DeleteAll</a>
+    </div>
+</div>
 <table class="table">
-    <thead>
+    <thead style="background-color:#a5cdf9">
         <tr>
-            <th>
+            <th style="width:50%">
                 @Html.DisplayNameFor(model => model.Description)
             </th>
-            <th>
+            <th style="width:20%">
                 @Html.DisplayNameFor(model => model.CreationDate)
             </th>
-            <th></th>
+            <th style="width:30%" class="text-center">
+                Action
+            </th>
         </tr>
     </thead>
     <tbody>
@@ -32,10 +41,10 @@
             <td>
                 @Html.DisplayFor(modelItem => item.CreationDate)
             </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+            <td class="text-center">
+                <a class="btn btn-outline-primary btn-sm mr-1 ml-2" asp-action="Edit" asp-route-id="@item.Id">Edit</a>
+                <a class="btn btn-outline-primary btn-sm mr-1 ml-2" asp-action="Details" asp-route-id="@item.Id">Details</a>
+                <a class="btn btn-outline-primary btn-sm mr-1 ml-2" asp-action="Delete" asp-route-id="@item.Id">Delete</a>
             </td>
         </tr>
 }

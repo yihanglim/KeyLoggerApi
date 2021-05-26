@@ -35,6 +35,7 @@ namespace KeyLoggerApi
                 options.UseSqlServerStorage(Configuration.GetConnectionString("DefaultConnection"));
             });
             services.AddHangfireServer();
+            services.AddControllersWithViews().AddRazorRuntimeCompilation();
 
 
         }
@@ -66,7 +67,7 @@ namespace KeyLoggerApi
             {
                 endpoints.MapControllerRoute(
                     name: "default",
-                    pattern: "{controller=Home}/{action=Index}/{id?}");
+                    pattern: "{controller=Keylogger}/{action=Index}/{id?}");
                 endpoints.MapHangfireDashboard();
             });
         }

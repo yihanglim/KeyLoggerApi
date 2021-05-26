@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using KeyLoggerApi.Models;
+using ClosedXML.Excel;
+using System.IO;
 
 namespace KeyLoggerApi.Controllers
 {
@@ -140,6 +142,48 @@ namespace KeyLoggerApi.Controllers
             _context.WordLists.Remove(wordList);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
+        }
+
+        public async Task<IActionResult> PrintAll()
+        {
+            try
+            {
+                List<WordList> allData = new List<WordList>();
+
+                allData = await _context.WordLists.ToListAsync();
+
+                string contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+                string fileName = "Word_Lists_" + DateTime.Now + ".xlsx";
+
+                var workbook = new XLWorkbook();
+                IXLWorksheet worksheet = workbook.Worksheets.Add("Word_List");
+                worksheet.Cell(1, 1).Value = "Description";
+                worksheet.Cell(1, 2).Value = "Date";
+                worksheet.Cell(1, 3).Value = "Time";
+
+                for (int index = 1; index <= allData.Count; index++)
+                {
+                    worksheet.Cell(index + 1, 1).Value = allData[index - 1].Description;
+                    worksheet.Cell(index + 1, 2).Value = allData[index - 1].CreationDate.ToString("MM/dd/yyyy");
+                    worksheet.Cell(index + 1, 3).Value = allData[index - 1].CreationDate.ToString("HH:mm:ss");
+                }
+
+                using (var stream = new MemoryStream())
+                {
+                    workbook.SaveAs(stream);
+                    var content = stream.ToArray();
+                    return File(content, contentType, fileName);
+                }
+            }
+            catch (Exception ex)
+            {
+                return Error();
+            }
+        }
+
+        private IActionResult Error()
+        {
+            throw new NotImplementedException();
         }
 
         public async Task<IActionResult> DeleteAll()
