@@ -21,8 +21,14 @@
                         <li class="nav-item mr-5">
                             <a class="nav-link text-light font-weight-bold" asp-area="" asp-controller="WordList" asp-action="Index">Word List</a>
                         </li>
-                        <li class="nav-item">
+                        <li class="nav-item mr-5">
                             <a class="nav-link text-light font-weight-bold" asp-area="" asp-controller="DetectedWords" asp-action="Index">DetectedWord</a>
+                        </li>
+                        <li class="nav-item mr-5">
+                            <a class="nav-link text-light font-weight-bold start-logging" href="#">Start Logging</a>
+                        </li>
+                        <li class="nav-item mr-5">
+                            <a class="nav-link text-light font-weight-bold stop-logging" href="#">Stop Logging</a>
                         </li>
                     </ul>
                 </div>
@@ -32,6 +38,22 @@
     <div class="container">
         <main role="main" class="pb-3">
             @RenderBody()
+            <div class="modal" id="statusModal" tabindex="-1" role="dialog">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title"></h5>
+                            <a href="#" class="closeStatus" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </a>
+                        </div>
+                        <div class="modal-body text-center"></div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-primary closeStatus" style="margin:auto">OK</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </main>
     </div>
 
@@ -44,5 +66,72 @@
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @RenderSection("Scripts", required: false)
+    <script type="text/javascript">
+        $(".closeStatus").click(function () {
+            $("#statusModal").hide();
+            $(".modal-body").text("");
+            $(".modal-title").text("");
+
+        });
+
+        $(".start-logging").click(function () {
+            var formData = {};
+            $(".modal-body").text("");
+            $(".modal-title").text("");
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("StartLogging", "Keylogger")',
+                data: formData,
+                dataType: "json",
+                global: false,
+                contentType: "application/x-www-form-urlencoded; charset=utf-8",
+                cache: false,
+                error: function (xhr, textStatus, errorThrown) {
+                    alert("error while retrieving data");
+                },
+                success: function (response) {
+                    if (response.status) {
+                        $("#statusModal").show();
+                        $(".modal-body").text("Success!");
+                        $(".modal-title").text("Start Logging");
+                    }
+                    else {
+                        $("#statusModal").modal("show");
+                        $(".modal-title").text("Start Logging");
+                        $(".modal-body").text("Error, please try again!")
+                    }
+                }
+            });
+        });
+
+        $(".stop-logging").click(function () {
+            var formData = {};
+            $(".modal-body").text("");
+            $(".modal-title").text("");
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("StopLogging", "Keylogger")',
+                data: formData,
+                dataType: "json",
+                global: false,
+                contentType: "application/x-www-form-urlencoded; charset=utf-8",
+                cache: false,
+                error: function (xhr, textStatus, errorThrown) {
+                    alert("error while retrieving data");
+                },
+                success: function (response) {
+                    if (response.status) {
+                        $("#statusModal").show();
+                        $(".modal-body").text("Success!");
+                        $(".modal-title").text("Stop Logging");                    }
+                    else {
+                        $("#statusModal").show();
+                        $(".modal-title").text("Stop Logging");
+                        $(".modal-body").text("Error, please try again!")                    }
+                }
+            });
+        });
+    </script>
+
 </body>
 </html>

