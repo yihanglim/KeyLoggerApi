@@ -45,7 +45,9 @@ Button function on the front page<br/>
 
 ### Key Logging
 
-The program will log the user input from the local IP Address http://192.168.4.1. This function utilise Hangfire library to run the key logging function on a 15 seconds interval.
+The program will log the user input from the local IP Address http://192.168.4.1. The program will ping the IP address and return a string if there is any key input.
+
+This program utilise Hangfire library to ping the IP Address on a 15 seconds interval to check if there is any new key input.
 When user press the Start Logging button, the program will create a recurring job with Hangfire to run the key loggin function on a interval until the program is turned off or stopeed by the user.
 To check the job status, user can navigate to the Hangfire dashboard through the following link. https://localhost:44399/hangfire. Please change the port number accordingly.
 
