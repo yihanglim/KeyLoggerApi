@@ -46,12 +46,14 @@ Button function on the front page<br/>
 ### Key Logging
 
 The program will log the user input from the local IP Address http://192.168.4.1. The program will ping the IP address and return a string if there is any key input.
+The program use HTTP class instance and acts as a session to send HTTP requests. 
+An HttpClient instance is a collection of settings applied to all requests executed by that instance
 
 This program utilise Hangfire library to ping the IP Address on a 15 seconds interval to check if there is any new key input.
 When user press the Start Logging button, the program will create a recurring job with Hangfire to run the key loggin function on a interval until the program is turned off or stopeed by the user.
 To check the job status, user can navigate to the Hangfire dashboard through the following link. https://localhost:44399/hangfire. Please change the port number accordingly.
 
-Before saving data to the database, the data will be scanned through with the Word List retireve from the database. Once a matching word is found, the word will be recorded as sensitive word and saved into the detected word table.
+Before saving data to the database, the data will be scanned through with the Word List retrieve from the database. Once a matching word is found, the word will be recorded as sensitive word and saved into the detected word table.
 The scanning code is using Linq method ( wordList.Where(x => data.Contains(x)).ToList(); ) to match the word and store in a List. Then the list will be saved into the DetectedWord database.
 
 Once the data is saved, the program will call the IP http://192.168.4.1/clear to clear the recorded data to have a clean page to record new data. 
@@ -73,7 +75,7 @@ Razor page simplify the data processing and data transfer to the interface.
 
 The page is styled with CSS and bootstrap. 
 
-To load the data dynamically, Ajax is used in this case so that the new data can be retireve from database without reloading the page
+To load the data dynamically, Ajax is used in this case so that the new data can be retireve from database without reloading the page.
 When a time specific data is selected, the time data is sent to the server to retrieve the data from the database and filter based on the time data.
 To retrieve or save a specific data, the unique id of the data is used to retreive the data from the database.
 
