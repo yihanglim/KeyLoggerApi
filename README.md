@@ -43,6 +43,10 @@ Button function on the front page<br/>
 
 **"Print"**: Print the data on the specific date<br/>
 
+
+![Key Logging Process](KeyLoggingProcess.jpg)
+
+
 ### Key Logging
 
 The program will log the user input from the local IP Address http://192.168.4.1. The program will ping the IP address and return a string if there is any key input.
@@ -67,6 +71,11 @@ WordLists table - to store a list of word used to scan the key input to detect s
 DetectedWords table = to store all the sensitive word. 
 
 The data will have a unique id in Guid format and Creation datetime to store the time when the data is recorded.
+<br/>
+<br/>
+
+![Data Retrieve Process](DataRetrieveProcess.jpg)
+
 
 ### User Interface  
 
